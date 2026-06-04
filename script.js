@@ -37,3 +37,38 @@ const toggleNavbar = function () {
 
 // This will now loop through your buttons and overlay perfectly!
 addEventOnElements(navTogglers, "click", toggleNavbar);
+
+
+/**
+ * HEADER
+ */
+const header = document.querySelector("[data-header]");
+
+let lastScrollPos = 0;
+
+const hideHeader = function() {
+    const currentScrollPos = window.scrollY;
+
+    if (lastScrollPos < currentScrollPos && currentScrollPos > 50) {
+        header.classList.add("hide");
+    } else {
+        header.classList.remove("hide");
+    }
+
+    if (currentScrollPos >= 50) {
+        header.classList.add("active");
+    } else {
+        header.classList.remove("active");
+    }
+
+    lastScrollPos = currentScrollPos;
+}
+
+window.addEventListener("scroll", function(){
+    if (window.scrollY >= 50) {
+        header.classList.add("active");
+        hideHeader();
+    } else {
+        header.classList.remove("active");
+    }
+});
