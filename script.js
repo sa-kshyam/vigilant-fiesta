@@ -1,74 +1,170 @@
 'use strict';
 
-/**
- * PRELOADER
- */
-const preloader = document.querySelector("[data-preload]");
 
-window.addEventListener("load", function() {
-    preloader.classList.add("loaded");
-    document.body.classList.add("loaded");
+
+/**
+ * PRELOAD
+ * 
+ * loading will be end after document is loaded
+ */
+
+const preloader = document.querySelector("[data-preaload]");
+
+window.addEventListener("load", function () {
+  preloader.classList.add("loaded");
+  document.body.classList.add("loaded");
 });
 
 
-/** * ADD EVENT LISTENER ON MULTIPLE ELEMENTS
- * Fixed: Changed function name, fixed query typo, and updated event.length to elements.length
+
+/**
+ * add event listener on multiple elements
  */
-const addEventOnElements = function(elements, eventType, callback) {
-    for (let i = 0, len = elements.length; i < len; i++) {
-        elements[i].addEventListener(eventType, callback);
-    }
+
+const addEventOnElements = function (elements, eventType, callback) {
+  for (let i = 0, len = elements.length; i < len; i++) {
+    elements[i].addEventListener(eventType, callback);
+  }
 }
+
 
 
 /**
  * NAVBAR
- * Fixed: Changed querySelector to querySelectorAll for navTogglers
  */
+
 const navbar = document.querySelector("[data-navbar]");
-const navTogglers = document.querySelectorAll("[data-nav-toggler]"); // Target all close/open buttons
+const navTogglers = document.querySelectorAll("[data-nav-toggler]");
 const overlay = document.querySelector("[data-overlay]");
 
 const toggleNavbar = function () {
-    navbar.classList.toggle("active");
-    overlay.classList.toggle("active");
-    document.body.classList.toggle("nav-active");
+  navbar.classList.toggle("active");
+  overlay.classList.toggle("active");
+  document.body.classList.toggle("nav-active");
 }
 
-// This will now loop through your buttons and overlay perfectly!
 addEventOnElements(navTogglers, "click", toggleNavbar);
 
 
+
 /**
- * HEADER
+ * HEADER & BACK TOP BTN
  */
+
 const header = document.querySelector("[data-header]");
+const backTopBtn = document.querySelector("[data-back-top-btn]");
 
 let lastScrollPos = 0;
 
-const hideHeader = function() {
-    const currentScrollPos = window.scrollY;
+const hideHeader = function () {
+  const isScrollBottom = lastScrollPos < window.scrollY;
+  if (isScrollBottom) {
+    header.classList.add("hide");
+  } else {
+    header.classList.remove("hide");
+  }
 
-    if (lastScrollPos < currentScrollPos && currentScrollPos > 50) {
-        header.classList.add("hide");
-    } else {
-        header.classList.remove("hide");
-    }
-
-    if (currentScrollPos >= 50) {
-        header.classList.add("active");
-    } else {
-        header.classList.remove("active");
-    }
-
-    lastScrollPos = currentScrollPos;
+  lastScrollPos = window.scrollY;
 }
 
-window.addEventListener("scroll", function(){
-    if (window.scrollY >= 50) {
-        header.classList.add("active");
-        hideHeader();
-    } else {
-        header.classList.remove("active");
-    }
+window.addEventListener("scroll", function () {
+  if (window.scrollY >= 50) {
+    header.classList.add("active");
+    backTopBtn.classList.add("active");
+    hideHeader();
+  } else {
+    header.classList.remove("active");
+    backTopBtn.classList.remove("active");
+  }
+});
+
+
+
+/**
+ * HERO SLIDER
+ */
+
+const heroSlider = document.querySelector("[data-hero-slider]");
+const heroSliderItems = document.querySelectorAll("[data-hero-slider-item]");
+const heroSliderPrevBtn = document.querySelector("[data-prev-btn]");
+const heroSliderNextBtn = document.querySelector("[data-next-btn]");
+
+let currentSlidePos = 0;
+let lastActiveSliderItem = heroSliderItems[0];
+
+const updateSliderPos = function () {
+  lastActiveSliderItem.classList.remove("active");
+  heroSliderItems[currentSlidePos].classList.add("active");
+  lastActiveSliderItem = heroSliderItems[currentSlidePos];
+}
+
+const slideNext = function () {
+  if (currentSlidePos >= heroSliderItems.length - 1) {
+    currentSlidePos = 0;
+  } else {
+    currentSlidePos++;
+  }
+
+  updateSliderPos();
+}
+
+heroSliderNextBtn.addEventListener("click", slideNext);
+
+const slidePrev = function () {
+  if (currentSlidePos <= 0) {
+    currentSlidePos = heroSliderItems.length - 1;
+  } else {
+    currentSlidePos--;
+  }
+
+  updateSliderPos();
+}
+
+heroSliderPrevBtn.addEventListener("click", slidePrev);
+
+/**
+ * auto slide
+ */
+
+let autoSlideInterval;
+
+const autoSlide = function () {
+  autoSlideInterval = setInterval(function () {
+    slideNext();
+  }, 7000);
+}
+
+addEventOnElements([heroSliderNextBtn, heroSliderPrevBtn], "mouseover", function () {
+  clearInterval(autoSlideInterval);
+});
+
+addEventOnElements([heroSliderNextBtn, heroSliderPrevBtn], "mouseout", autoSlide);
+
+window.addEventListener("load", autoSlide);
+
+
+
+/**
+ * PARALLAX EFFECT
+ */
+
+const parallaxItems = document.querySelectorAll("[data-parallax-item]");
+
+let x, y;
+
+window.addEventListener("mousemove", function (event) {
+
+  x = (event.clientX / window.innerWidth * 10) - 5;
+  y = (event.clientY / window.innerHeight * 10) - 5;
+
+  // reverse the number eg. 20 -> -20, -5 -> 5
+  x = x - (x * 2);
+  y = y - (y * 2);
+
+  for (let i = 0, len = parallaxItems.length; i < len; i++) {
+    x = x * Number(parallaxItems[i].dataset.parallaxSpeed);
+    y = y * Number(parallaxItems[i].dataset.parallaxSpeed);
+    parallaxItems[i].style.transform = `translate3d(${x}px, ${y}px, 0px)`;
+  }
+
 });
